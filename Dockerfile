@@ -1,10 +1,15 @@
 # stage 1
-FROM node:12.3.1 as node
+FROM node:13 as build
+# Use an official Node.js runtime as a parent image
+
 WORKDIR /app
-COPY . .
+COPY package*.json ./
 RUN npm install
+COPY . .
 RUN npm run build --prod
 
-# stage 2
+# Serve the app with Nginx
 FROM nginx:alpine
-COPY --from=node /app/dist/apex /usr/share/nginx/html
+COPY --from=build /app/dist/apex /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
